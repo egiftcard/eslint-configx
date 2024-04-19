@@ -1,24 +1,24 @@
 module.exports = {
   root: true,
 
-  extends: ['@egiftcard/eslint-config', '@egiftcard/eslint-config-nodejs'],
+  parserOptions: {
+    ecmaVersion: 2018,
+  },
 
-  overrides: [
-    {
-      files: ['./scripts/*.js'],
-      parserOptions: {
-        ecmaVersion: 2018,
-        sourceType: 'script',
-      },
-      rules: {
-        'import/no-dynamic-require': 'off',
-        'node/global-require': 'off',
-        'node/no-process-exit': 'off',
-        'node/no-sync': 'off',
-        'node/no-unpublished-require': 'off',
-      },
-    },
+  extends: [
+    '@egiftcard/eslint-config',
+    '@egiftcard/eslint-config-nodejs',
+    '@egiftcard/eslint-config-jest',
   ],
+
+  rules: {
+    'import/no-dynamic-require': 'off',
+    'import/no-nodejs-modules': 'off',
+    'n/global-require': 'off',
+    'n/no-process-exit': 'off',
+    'n/no-sync': 'off',
+    'n/no-unpublished-require': 'off',
+  },
 
   ignorePatterns: ['!.eslintrc.js'],
 };

@@ -1,26 +1,47 @@
+const environmentRules = require('./environment.json');
+
 module.exports = {
   env: {
-    // Specifying the ES version automatically sets the correct parser option.
-    // https://eslint.org/docs/user-guide/configuring/language-options#specifying-environments
-    // For JavaScript, ES2017 is our effective minimum version due to the use
-    // of Esprima by transitive dependencies.
-    // It doesn't handle object rest spread, which is a 2018 feature.
-    'es2017': true,
+    // See comment under `parserOptions` below.
+    es2017: true,
     'shared-node-browser': true,
   },
 
-  plugins: ['import', 'prettier'],
+  parserOptions: {
+    // The `esXXXX` option under `env` is supposed to set the correct
+    // `ecmaVersion` option here, but we've had issues with it being
+    // overridden in the past and therefore set it explicitly.
+    //
+    // For JavaScript, ES2017 is our effective minimum version due to the use
+    // of Esprima by transitive dependencies.
+    // It doesn't handle object rest spread, which is a 2018 feature.
+    ecmaVersion: 2017,
+    // We want to default to 'script' and only use 'module' explicitly.
+    sourceType: 'script',
+  },
 
-  extends: ['eslint:recommended', 'plugin:prettier/recommended'],
+  plugins: ['jsdoc', 'prettier', 'promise'],
+
+  extends: [
+    'eslint:recommended',
+    'plugin:prettier/recommended',
+    'plugin:import/recommended',
+  ],
 
   rules: {
+    ...environmentRules,
+
     /* Prettier rules */
     'prettier/prettier': [
       'error',
       {
+        // All of these are defaults except singleQuote and endOfLine, but we specify them
+        // for explicitness
+        endOfLine: 'auto',
+        quoteProps: 'as-needed',
         singleQuote: true,
+        tabWidth: 2,
         trailingComma: 'all',
-        quoteProps: 'consistent',
       },
       {
         // Allow consumers to override this prettier config.
@@ -29,36 +50,14 @@ module.exports = {
       },
     ],
 
-    // Prettier has some opinions on mixed-operators, and there is ongoing work
-    // to make the output code clear. The workaround for keeping this rule enabled
-    // requires breaking parts of operations into different variables -- which we
-    // decided to be worse.
-    // https://github.com/prettier/eslint-config-prettier#no-mixed-operators
-    'no-mixed-operators': 'off',
-
-    // Prettier wraps e.g. single line functions with ternaries in parens by default, but
-    // if the line is long enough it breaks it into a separate line and removes the parens.
-    // The second behavior conflicts with this rule. There is some advice on the repo about
-    // how you can keep it enabled:
-    // https://github.com/prettier/eslint-config-prettier#no-confusing-arrow
-    // However, in practice this conflicts with prettier adding parens around short lines,
-    // when autofixing in vscode and others.
-    'no-confusing-arrow': 'off',
-
-    'curly': ['error', 'all'],
-    'max-len': 'off',
+    curly: ['error', 'all'],
     'no-tabs': 'error',
-    'no-unexpected-multiline': 'off',
-    'quotes': 'off',
-
-    // Not required by prettier, but potentially gotchas.
-    'no-restricted-syntax': ['error', 'SequenceExpression'],
 
     /* Core rules */
     'accessor-pairs': 'error',
     'array-callback-return': 'error',
     'block-scoped-var': 'error',
-    'camelcase': [
+    camelcase: [
       'error',
       {
         properties: 'never',
@@ -70,10 +69,34 @@ module.exports = {
     'default-case': 'error',
     'default-param-last': 'error',
     'dot-notation': 'error',
-    'eqeqeq': ['error', 'allow-null'],
+    eqeqeq: ['error', 'allow-null'],
     'func-name-matching': 'error',
     'grouped-accessor-pairs': 'error',
     'guard-for-in': 'error',
+    'id-denylist': [
+      // This sets this rule to 'error', the rest are the forbidden IDs.
+      'error',
+      // These are basically all useless contractions.
+      'buf',
+      'cat',
+      'err',
+      'cb',
+      'cfg',
+      'hex',
+      'int',
+      'msg',
+      'num',
+      'opt',
+      'sig',
+    ],
+    'id-length': [
+      'error',
+      {
+        min: 2,
+        properties: 'never',
+        exceptionPatterns: ['_', 'a', 'b', 'i', 'j', 'k'],
+      },
+    ],
     'lines-between-class-members': 'error',
     'max-statements-per-line': [
       'error',
@@ -95,7 +118,6 @@ module.exports = {
     'no-caller': 'error',
     'no-constructor-return': 'error',
     'no-div-regex': 'error',
-    'no-duplicate-imports': 'error',
     'no-else-return': 'error',
     'no-empty-function': 'error',
     'no-eq-null': 'error',
@@ -139,7 +161,23 @@ module.exports = {
       },
     ],
     'no-proto': 'error',
-    'no-restricted-globals': ['error', 'event'],
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'WithStatement',
+        message: 'With statements are not allowed',
+      },
+      {
+        selector: `BinaryExpression[operator='in']`,
+        message: 'The "in" operator is not allowed',
+      },
+      // Sequence expressions have potential gotchas with Prettier, and are also
+      // weird!
+      {
+        selector: 'SequenceExpression',
+        message: 'Sequence expressions are not allowed',
+      },
+    ],
     'no-return-assign': ['error', 'except-parens'],
     'no-script-url': 'error',
     'no-self-compare': 'error',
@@ -167,6 +205,7 @@ module.exports = {
         vars: 'all',
         args: 'all',
         argsIgnorePattern: '[_]+',
+        ignoreRestSiblings: true,
       },
     ],
     'no-use-before-define': [
@@ -227,7 +266,7 @@ module.exports = {
     'prefer-rest-params': 'error',
     'prefer-spread': 'error',
     'prefer-template': 'error',
-    'radix': 'error',
+    radix: 'error',
     'require-atomic-updates': 'error',
     'require-unicode-regexp': 'error',
     'spaced-comment': [
@@ -247,11 +286,9 @@ module.exports = {
       },
     ],
     'symbol-description': 'error',
-    'yoda': ['error', 'never'],
+    yoda: ['error', 'never'],
 
     /* import plugin rules */
-    'import/default': 'error',
-    'import/export': 'error',
     'import/extensions': [
       'error',
       'never',
@@ -260,8 +297,6 @@ module.exports = {
       },
     ],
     'import/first': 'error',
-    'import/named': 'error',
-    'import/namespace': 'error',
     'import/newline-after-import': 'error',
     'import/no-absolute-path': 'error',
     'import/no-amd': 'error',
@@ -273,6 +308,7 @@ module.exports = {
     'import/no-named-as-default': 'error',
     'import/no-named-as-default-member': 'error',
     'import/no-named-default': 'error',
+    'import/no-nodejs-modules': 'error',
     'import/no-self-import': 'error',
     'import/no-unassigned-import': 'error',
     'import/no-unresolved': [
@@ -289,7 +325,76 @@ module.exports = {
       },
     ],
     'import/no-webpack-loader-syntax': 'error',
-    'import/order': 'error',
+    'import/order': [
+      'error',
+      {
+        // This means that there will always be a newline between the import
+        // groups as defined below.
+        'newlines-between': 'always',
+
+        groups: [
+          // "builtin" is Node.js modules that are built into the runtime, and
+          // "external" is everything else from node_modules.
+          ['builtin', 'external'],
+
+          // "internal" is unused, but could be used for absolute imports from
+          // the project root.
+          ['internal', 'parent', 'sibling', 'index'],
+        ],
+
+        // Alphabetically sort the imports within each group.
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+      },
+    ],
     'import/unambiguous': 'error',
+
+    /* jsdoc plugin rules */
+    'jsdoc/check-access': 'error',
+    'jsdoc/check-alignment': 'error',
+    'jsdoc/check-line-alignment': 'error',
+    'jsdoc/check-param-names': 'error',
+    'jsdoc/check-property-names': 'error',
+    'jsdoc/check-tag-names': 'error',
+    'jsdoc/check-types': 'error',
+    'jsdoc/check-values': 'error',
+    'jsdoc/empty-tags': 'error',
+    'jsdoc/implements-on-classes': 'error',
+    'jsdoc/match-description': [
+      'error',
+      { tags: { param: true, returns: true } },
+    ],
+    'jsdoc/multiline-blocks': 'error',
+    'jsdoc/no-bad-blocks': 'error',
+    'jsdoc/no-defaults': 'error',
+    'jsdoc/no-multi-asterisks': 'error',
+    'jsdoc/require-asterisk-prefix': 'error',
+    'jsdoc/require-description': 'error',
+    'jsdoc/require-hyphen-before-param-description': [
+      'error',
+      'always',
+      { tags: { returns: 'never', template: 'always', throws: 'never' } },
+    ],
+    'jsdoc/require-jsdoc': 'error',
+    'jsdoc/require-param-name': 'error',
+    'jsdoc/require-param': ['error', { unnamedRootBase: ['options'] }],
+    'jsdoc/require-param-description': 'error',
+    'jsdoc/require-param-type': 'error',
+    'jsdoc/require-property': 'error',
+    'jsdoc/require-property-description': 'error',
+    'jsdoc/require-property-name': 'error',
+    'jsdoc/require-property-type': 'error',
+    'jsdoc/require-returns': 'error',
+    'jsdoc/require-returns-check': 'error',
+    'jsdoc/require-returns-description': 'error',
+    'jsdoc/require-returns-type': 'error',
+    'jsdoc/require-yields': 'error',
+    'jsdoc/require-yields-check': 'error',
+    'jsdoc/tag-lines': 'error',
+    'jsdoc/valid-types': 'error',
+
+    'promise/no-multiple-resolved': 'error',
   },
 };

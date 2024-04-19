@@ -1,36 +1,46 @@
 {
   "name": "@egiftcard/eslint-config-jest",
-  "version": "6.0.0",
-  "description": "Shareable EgiftCard ESLint config for Jest.",
-  "main": "src/index.js",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
-  },
-  "files": [
-    "src/"
-  ],
-  "engines": {
-    "node": ">=12.0.0"
-  },
-  "scripts": {
-    "test": "eslint ."
+  "version": "12.1.0",
+  "description": "Shareable eGiftCard ESLint config for Jest.",
+  "homepage": "https://github.com/eGiftCard/eslint-config#readme",
+  "bugs": {
+    "url": "https://github.com/eGiftCard/eslint-config/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EgiftCard/eslint-config.git"
+    "url": "https://github.com/eGiftCard/eslint-config.git"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/EgiftCard/eslint-config/issues"
+  "main": "src/index.js",
+  "files": [
+    "src/",
+    "!src/**/*.test.js"
+  ],
+  "scripts": {
+    "lint:changelog": "auto-changelog validate",
+    "publish": "npm publish",
+    "test": "eslint ."
   },
-  "homepage": "https://github.com/EgiftCard/eslint-config#readme",
   "devDependencies": {
-    "eslint": "^7.23.0",
-    "eslint-plugin-jest": "^24.1.3"
+    "@egiftcard/eslint-config": "^12.0.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "~2.26.0",
+    "eslint-plugin-jest": "^27.1.5",
+    "eslint-plugin-jsdoc": "^41.1.2",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.7.1"
   },
   "peerDependencies": {
-    "eslint": "^7.23.0",
-    "eslint-plugin-jest": "^24.1.3"
+    "@egiftcard/eslint-config": "^12.0.0",
+    "eslint": "^8.27.0",
+    "eslint-plugin-jest": "^27.1.5"
+  },
+  "engines": {
+    "node": "^16.20 || ^18.18 || >=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

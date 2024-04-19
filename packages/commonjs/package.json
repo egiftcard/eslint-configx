@@ -1,0 +1,43 @@
+{
+  "name": "@egiftcard/eslint-config-commonjs",
+  "version": "12.1.0",
+  "description": "Shareable eGiftCard ESLint config for CommonJS projects.",
+  "homepage": "https://github.com/eGiftCard/eslint-config#readme",
+  "bugs": {
+    "url": "https://github.com/eGiftCard/eslint-config/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eGiftCard/eslint-config.git"
+  },
+  "license": "MIT",
+  "main": "src/index.js",
+  "files": [
+    "src/",
+    "!src/**/*.test.js"
+  ],
+  "scripts": {
+    "lint:changelog": "auto-changelog validate",
+    "publish": "npm publish",
+    "test": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "~2.26.0",
+    "eslint-plugin-jsdoc": "^41.1.2",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.7.1"
+  },
+  "peerDependencies": {
+    "@egiftcard/eslint-config": "^12.0.0",
+    "eslint": "^8.27.0"
+  },
+  "engines": {
+    "node": "^16.20 || ^18.18 || >=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

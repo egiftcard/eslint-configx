@@ -1,16 +1,21 @@
 # `@egiftcard/eslint-config-mocha`
 
-EgiftCard's [Mocha](https://mochajs.org/) ESLint configuration.
+eGiftCard's [Mocha](https://mochajs.org/) ESLint configuration.
 
 ## Usage
 
 ```bash
 yarn add --dev \
-    eslint@^7.23.0 \
-    eslint-plugin-import@^2.22.0 \
-    eslint-plugin-mocha@^8.0.0 \
-    @egiftcard/eslint-config@^5.0.0 \
-    @egiftcard/eslint-config-mocha@^5.0.0
+    @egiftcard/eslint-config@^12.0.0 \
+    @egiftcard/eslint-config-mocha@^12.0.0 \
+    eslint@^8.45.0 \
+    eslint-config-prettier@^8.5.0 \
+    eslint-plugin-import@~2.26.0 \
+    eslint-plugin-jsdoc@^41.1.2 \
+    eslint-plugin-mocha@^10.1.0 \
+    eslint-plugin-prettier@^4.2.1 \
+    eslint-plugin-promise@^6.1.1 \
+    prettier@^2.7.1
 ```
 
 The order in which you extend ESLint rules matters.
@@ -27,7 +32,7 @@ module.exports = {
     '@egiftcard/eslint-config',
     '@egiftcard/eslint-config-mocha',
   ],
-}
+};
 ```
 
 If your project has `prefer-arrow-callback` you will need to disable that and replace it with `mocha/prefer-arrow-callback`.

@@ -1,40 +1,51 @@
 {
   "name": "@egiftcard/eslint-config-typescript",
-  "version": "6.0.0",
-  "description": "Shareable EgiftCard ESLint config for TypeScript.",
-  "main": "src/index.js",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
-  },
-  "files": [
-    "src/"
-  ],
-  "engines": {
-    "node": ">=12.0.0"
-  },
-  "scripts": {
-    "test": "eslint ."
+  "version": "12.1.0",
+  "description": "Shareable eGiftCard ESLint config for TypeScript.",
+  "homepage": "https://github.com/eGiftCard/eslint-config#readme",
+  "bugs": {
+    "url": "https://github.com/eGiftCard/eslint-config/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EgiftCard/eslint-config.git"
+    "url": "https://github.com/eGiftCard/eslint-config.git"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/EgiftCard/eslint-config/issues"
+  "main": "src/index.js",
+  "files": [
+    "src/",
+    "!src/**/*.test.js",
+    "!src/**/__test__"
+  ],
+  "scripts": {
+    "lint:changelog": "auto-changelog validate",
+    "publish": "npm publish",
+    "test": "eslint ."
   },
-  "homepage": "https://github.com/EgiftCard/eslint-config#readme",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.20.0",
-    "@typescript-eslint/parser": "^4.20.0",
-    "eslint": "^7.23.0",
-    "typescript": "^4.0.7"
+    "@egiftcard/eslint-config": "^12.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "~2.26.0",
+    "eslint-plugin-jsdoc": "^41.1.2",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.7.1",
+    "typescript": "^5.1.6"
   },
   "peerDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.20.0",
-    "@typescript-eslint/parser": "^4.20.0",
-    "eslint": "^7.23.0",
-    "typescript": "^4.0.7"
+    "@egiftcard/eslint-config": "^12.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
+    "typescript": "~4.8.4 || ~5.0 || ~5.1"
+  },
+  "engines": {
+    "node": "^16.20 || ^18.18 || >=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

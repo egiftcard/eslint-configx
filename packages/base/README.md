@@ -1,6 +1,6 @@
 # `@egiftcard/eslint-config`
 
-EgiftCard's base ESLint configuration.
+eGiftCard's base ESLint configuration.
 
 ## Usage
 
@@ -8,9 +8,14 @@ Our default export contains a base set of ESLint rules for ES6+:
 
 ```bash
 yarn add --dev \
-    eslint@^7.23.0 \
-    eslint-plugin-import@^2.22.0 \
-    @egiftcard/eslint-config@^5.0.0
+    @egiftcard/eslint-config@^12.0.0 \
+    eslint@^8.45.0 \
+    eslint-config-prettier@^8.5.0 \
+    eslint-plugin-import@~2.26.0 \
+    eslint-plugin-jsdoc@^41.1.2 \
+    eslint-plugin-prettier@^4.2.1 \
+    eslint-plugin-promise@^6.1.1 \
+    prettier@^2.7.1
 ```
 
 The order in which you extend ESLint rules matters.
@@ -24,5 +29,5 @@ module.exports = {
     // This should be added last unless you know what you're doing.
     '@egiftcard/eslint-config',
   ],
-}
+};
 ```

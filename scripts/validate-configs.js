@@ -1,11 +1,13 @@
-const { readdirSync, readFileSync, promises: fs } = require('fs');
-const pathUtils = require('path');
 const { FlatCompat } = require('@eslint/eslintrc');
-const eslintRecommendedConfig = require('eslint/conf/eslint-recommended');
+const eslintRecommendedConfig = require('@eslint/js').configs.recommended;
+const { hasProperty } = require('@metamask/utils');
 const {
   configs: { recommended: prettierConfig },
 } = require('eslint-plugin-prettier');
 const deepEqual = require('fast-deep-equal');
+const { readdirSync, readFileSync, promises: fs } = require('fs');
+const pathUtils = require('path');
+const prettier = require('prettier');
 
 // For config parsing, validation, and rule flattening
 const BASE_CONFIG_NAME = '@egiftcard/eslint-config';
@@ -137,7 +139,7 @@ function validatePrettierRules(
   violations,
 ) {
   prettierRules.forEach((ruleName) => {
-    if (ruleName in flatRules && flatRules[ruleName] !== OFF) {
+    if (hasProperty(flatRules, ruleName) && flatRules[ruleName] !== OFF) {
       violations[packageName].push(ruleName);
     }
   });
@@ -165,7 +167,7 @@ function validateConfigMinimalism(
   Object.entries(config.rules || {}).forEach(([ruleName, ruleValue]) => {
     if (
       deepEqual(flatExtendedRules[ruleName], ruleValue) ||
-      (!(ruleName in flatExtendedRules) && ruleValue === OFF)
+      (!hasProperty(flatExtendedRules, ruleName) && ruleValue === OFF)
     ) {
       violations[packageName].push(ruleName);
     }
@@ -175,7 +177,7 @@ function validateConfigMinimalism(
 /**
  * Checks whether a config violations map contains any violations.
  *
- * @param {Record<string, string[]>} - A map of package names to arrays with
+ * @param {Record<string, string[]>} violationsMap - A map of package names to arrays with
  * violated rules, if any.
  * @returns {boolean} Whether the given map contains any violations.
  */
@@ -252,11 +254,12 @@ async function validateOrWriteRulesSnapshot(
  * @param {Record<string, unknown>} flatRules - The rules to write.
  */
 async function writeRulesSnapshot(snapshotFilePath, flatRules) {
+  const stringifiedRules = JSON.stringify(flatRules, null, 2);
+  const formattedRules = prettier.format(stringifiedRules, {
+    filepath: snapshotFilePath,
+  });
   try {
-    await fs.writeFile(
-      snapshotFilePath,
-      `${JSON.stringify(flatRules, null, 2)}\n`,
-    );
+    await fs.writeFile(snapshotFilePath, formattedRules);
   } catch (error) {
     console.error(
       `Encountered error while writing file "${snapshotFilePath}".`,
@@ -273,11 +276,11 @@ async function writeRulesSnapshot(snapshotFilePath, flatRules) {
 /**
  * Iterates over the packages in this monorepo and returns an object of package
  * name keys with object values containing:
- * - The raw config
- * - Its flattened, complete rule set
- * - The path to the package
+ * - The raw config.
+ * - Its flattened, complete rule set.
+ * - The path to the package.
  *
- * @returns {Record<string, Record<string, Object|string>} The config map.
+ * @returns {Record<string, Record<string, object|string>>} The config map.
  */
 function getMetamaskConfigs() {
   return readdirSync(PACKAGES_DIR_PATH).reduce((allConfigs, dirName) => {
@@ -302,7 +305,7 @@ function getMetamaskConfigs() {
  * The own flat rules are the combined flat rules for every config extended by
  * the given config, and the config's own rules.
  * The extended flat rules are config's own flat rules combined with the flat
- * rules of the EgiftCard base config.
+ * rules of the eGiftCard base config.
  *
  * The extended flat rules are computed in this way because we assume that
  * consumers will extend our base config first, and then others. We want to
@@ -360,18 +363,17 @@ function getFlatConfigWithBaseConfig(configObject) {
  * disabled when using Prettier.
  */
 function getRequiredPrettierRules() {
-  return Object.entries(getFlatRules(getFlatConfig(prettierConfig))).reduce(
-    (allRules, [ruleName, ruleValue]) => {
-      // Rules set to 'off' should never be enabled.
-      // Rules set to 0 (number) may sometimes be included. We don't attend to those.
-      // https://github.com/Prettier/eslint-config-Prettier/blob/abf3ba1/index.js#L7-L9
-      if (ruleValue === OFF) {
-        allRules.push(ruleName);
-      }
-      return allRules;
-    },
-    [],
-  );
+  return Object.entries(
+    getFlatRules(getFlatConfig(prettierConfig), false),
+  ).reduce((allRules, [ruleName, ruleValue]) => {
+    // Rules set to 'off' should never be enabled.
+    // Rules set to 0 (number) may sometimes be included. We don't attend to those.
+    // https://github.com/Prettier/eslint-config-Prettier/blob/abf3ba1/index.js#L7-L9
+    if (ruleValue === OFF) {
+      allRules.push(ruleName);
+    }
+    return allRules;
+  }, []);
 }
 
 //----------------
@@ -383,13 +385,16 @@ function getRequiredPrettierRules() {
  * of its extended configs (if any) in a single, flat object.
  *
  * @param {Record<string, unknown>[]} flatConfig - A flat eslint config array.
+ * @param {boolean} [normalizeRules] - Whether to normalize rule config values
+ * to use string notation (off, warn, error) instead of numerical notation
+ * (0, 1, 2). Non-numerical values are passed through.
  * @returns {Record<string, unknown>} An object of eslint rule names and their
  * configuration.
  */
-function getFlatRules(flatConfig) {
+function getFlatRules(flatConfig, normalizeRules = true) {
   // Flatten the config array into a single object
   const rawFlatRules = flatConfig.reduce((flatRules, config) => {
-    if (RULES in config) {
+    if (hasProperty(config, RULES)) {
       return {
         ...flatRules,
         ...config[RULES],
@@ -399,23 +404,53 @@ function getFlatRules(flatConfig) {
   }, {});
 
   // Sort the flat rules alphabetically and return them
-  return sortObject(rawFlatRules);
+  return normalizeRules
+    ? normalizeObject(rawFlatRules, normalizeRuleConfigValue)
+    : normalizeObject(rawFlatRules);
 }
 
 /**
  * Sorts the keys of the given object, inserts them in that order in a new
- * object, and returns that object.
+ * object, and returns that object. Optionally normalizes the values of the
+ * object during sorting.
  *
  * @param {Record<string, unknown>} obj - The object to sort.
+ * @param {Function} [valueNormalizer] - A function that takes a value and
+ * returns a "normalized" version of it. The value of every key on the sorted
+ * object will be passed through this function, if present.
  * @returns {Record<string, unknown>} The sorted object.
  */
-function sortObject(obj) {
+function normalizeObject(obj, valueNormalizer) {
   return Object.keys(obj)
     .sort()
     .reduce((sortedObj, key) => {
-      sortedObj[key] = obj[key];
+      sortedObj[key] = valueNormalizer ? valueNormalizer(obj[key]) : obj[key];
       return sortedObj;
     }, {});
+}
+
+/**
+ * Given an ESLint rule config value, converts it from numerical (0, 1, 2) to
+ * string (off, warn, error) notation, or just returns the given value.
+ *
+ * @param {unknown} configValue - The rule config value to normalize.
+ * @returns {string | unknown} The normalized rule config value.
+ */
+function normalizeRuleConfigValue(configValue) {
+  if (typeof configValue !== 'number' && typeof configValue !== 'string') {
+    return configValue;
+  }
+
+  switch (String(configValue)) {
+    case '0':
+      return 'off';
+    case '1':
+      return 'warn';
+    case '2':
+      return 'error';
+    default:
+      return configValue;
+  }
 }
 
 /**
@@ -435,7 +470,7 @@ function getFlatConfig(configObject) {
 }
 
 /**
- * getFlatConfig helper.
+ * A helper for the `getFlatConfig` function.
  * Looks for for the string 'eslint:recommended' in the given config array
  * and replaces it with its corresponding rules object.
  * Mutates the given array in place.
@@ -481,7 +516,7 @@ function logPrettierViolations(prettierViolations) {
  * Prints minimalism violations to console.error in a readable format.
  * Assumes that the given violations map contains violations.
  *
- * @param {Record<string, string[]>} prettierViolations - A map containing
+ * @param {Record<string, string[]>} minimalismViolations - A map containing
  * minimalism violations.
  */
 function logMinimalismViolations(minimalismViolations) {
@@ -520,11 +555,13 @@ function logSnapshotViolations(snapshotViolations) {
   console.error(
     `\nError: Computed snapshot differs from the existing snapshot for the following package(s). Take a new snapshot and try again.\n\n${tabs(
       1,
-    )}${snapshotViolations.join(`\n${tabs(1)}`)}`,
+    )}${snapshotViolations.join(`\n${tabs(1)}`)}\n`,
   );
 }
 
 /**
+ * Returns the requested number of tabs.
+ *
  * @param {number} numTabs - The number of tabs to return.
  * @returns {string} A string consisting of numTabs 4-space "tabs".
  */

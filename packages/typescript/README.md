@@ -1,17 +1,22 @@
 # `@egiftcard/eslint-config-typescript`
 
-EgiftCard's [TypeScript](https://www.typescriptlang.org) ESLint configuration.
+eGiftCard's [TypeScript](https://www.typescriptlang.org) ESLint configuration.
 
 ## Usage
 
 ```bash
 yarn add --dev \
-    eslint@^7.23.0 \
-    eslint-plugin-import@^2.22.0 \
-    @typescript-eslint/eslint-plugin@^3.9.1 \
-    @typescript-eslint/parser@^3.9.1 \
-    @egiftcard/eslint-config@^5.0.0 \
-    @egiftcard/eslint-config-typescript@^5.0.0
+    @egiftcard/eslint-config@^12.0.0 \
+    @egiftcard/eslint-config-typescript@^12.0.0 \
+    @typescript-eslint/eslint-plugin@^5.42.1 \
+    @typescript-eslint/parser@^5.42.1 \
+    eslint@^8.45.0 \
+    eslint-config-prettier@^8.5.0 \
+    eslint-plugin-import@~2.26.0 \
+    eslint-plugin-jsdoc@^41.1.2 \
+    eslint-plugin-prettier@^4.2.1 \
+    eslint-plugin-promise@^6.1.1 \
+    prettier@^2.7.1
 ```
 
 The order in which you extend ESLint rules matters.
@@ -33,10 +38,14 @@ module.exports = {
     // non-TypeScript files, so it should be added in an override.
     {
       files: ['*.ts'],
-      extends: [
-        '@egiftcard/eslint-config-typescript',
-      ],
+      extends: ['@egiftcard/eslint-config-typescript'],
     },
   ],
+
+  // This is required for rules that use type information.
+  // See here for more information: https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/TYPED_LINTING.md
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+  },
 };
 ```

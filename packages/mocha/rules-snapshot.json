@@ -1,4 +1,5 @@
 {
+  "mocha/consistent-spacing-between-blocks": "error",
   "mocha/handle-done-callback": "error",
   "mocha/max-top-level-suites": [
     "error",
@@ -7,6 +8,7 @@
     }
   ],
   "mocha/no-async-describe": "error",
+  "mocha/no-empty-description": "error",
   "mocha/no-exclusive-tests": "error",
   "mocha/no-exports": "error",
   "mocha/no-global-tests": "error",
@@ -27,21 +29,13 @@
   "mocha/valid-suite-description": [
     "error",
     "^[#_]{0,2}[A-Za-z0-9]",
-    [
-      "describe",
-      "context",
-      "suite"
-    ],
+    ["describe", "context", "suite"],
     "Invalid test suite description found"
   ],
   "mocha/valid-test-description": [
     "error",
     "^[#_]{0,2}[A-Za-z0-9]",
-    [
-      "it",
-      "test",
-      "specify"
-    ],
+    ["it", "test", "specify"],
     "Invalid test description found"
   ]
 }
